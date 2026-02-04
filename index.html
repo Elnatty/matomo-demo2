@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Matomo Tag Manager – Advanced Test Lab</title>
+
+  <!-- Matomo Tag Manager -->
+  <script>
+    var _mtm = window._mtm = window._mtm || [];
+    _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
+    (function() {
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.async=true;
+      g.src='https://cdn.matomo.cloud/d31ng.matomo.cloud/container_7dc62agp.js';
+      s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <!-- End Matomo Tag Manager -->
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    button { margin: 8px; padding: 10px 16px; }
+    input { padding: 8px; margin: 6px 0; }
+    .box { border: 1px solid #ccc; padding: 20px; margin-top: 20px; }
+  </style>
+</head>
+
+<body>
+
+  <h1>Matomo Cloud – Event Abuse Test Site</h1>
+  <p>Designed for Tag Manager, BAC, IDOR & Business Logic testing.</p>
+
+  <!-- Button Events -->
+  <div class="box">
+    <h2>Button Events</h2>
+
+    <button onclick="simpleClick()">Simple Click</button>
+    <button onclick="purchaseClick()">Fake Purchase</button>
+    <button onclick="adminAction()">Admin-Like Action</button>
+  </div>
+
+  <!-- Form Events -->
+  <div class="box">
+    <h2>Form Events</h2>
+
+    <form onsubmit="submitForm(event)">
+      <input type="email" id="email" placeholder="Email address" required />
+      <br />
+      <button type="submit">Submit Form</button>
+    </form>
+  </div>
+
+  <!-- DOM & Timing Events -->
+  <div class="box">
+    <h2>Automatic Events</h2>
+
+    <p id="hoverTarget">Hover over this text</p>
+    <p id="timerStatus">Timer not triggered yet</p>
+  </div>
+
+  <!-- JavaScript Event Logic -->
+  <script>
+    function simpleClick() {
+      _mtm.push({
+        event: "simple_click",
+        buttonName: "simple_click_btn"
+      });
+      alert("Simple click sent");
+    }
+
+    function purchaseClick() {
+      _mtm.push({
+        event: "purchase",
+        ecommerce: {
+          orderId: "ORDER-" + Math.floor(Math.random() * 10000),
+          revenue: 99.99,
+          currency: "USD"
+        }
+      });
+      alert("Purchase event sent");
+    }
+
+    function adminAction() {
+      _mtm.push({
+        event: "admin_action",
+        role: "admin",
+        action: "delete_user",
+        userId: 1337
+      });
+      alert("Admin-style event sent");
+    }
+
+    function submitForm(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+
+      _mtm.push({
+        event: "form_submit",
+        formType: "newsletter",
+        email: email
+      });
+
+      alert("Form submit event sent");
+    }
+
+    // Hover event
+    document.getElementById("hoverTarget").addEventListener("mouseover", function () {
+      _mtm.push({
+        event: "hover_event",
+        element: "hoverTarget"
+      });
+    });
+
+    // Timer-based event (business logic gold)
+    setTimeout(() => {
+      document.getElementById("timerStatus").innerText = "Timer event fired";
+      _mtm.push({
+        event: "time_on_page",
+        seconds: 10
+      });
+    }, 10000);
+
+    // URL-based logic test
+    if (window.location.search.includes("promo=true")) {
+      _mtm.push({
+        event: "promo_view",
+        source: "url_param"
+      });
+    }
+  </script>
+
+</body>
+</html>
