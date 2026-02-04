@@ -1,133 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Matomo Tag Manager – Advanced Test Lab</title>
+<meta charset="UTF-8" />
+<title>Matomo Tag Manager – Test Lab</title>
 
-  <!-- Matomo Tag Manager -->
-  <script>
-    var _mtm = window._mtm = window._mtm || [];
-    _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
-    (function() {
-      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-      g.async=true;
-      g.src='https://cdn.matomo.cloud/d31ng.matomo.cloud/container_7dc62agp.js';
-      s.parentNode.insertBefore(g,s);
-    })();
-  </script>
-  <!-- End Matomo Tag Manager -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
 
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    button { margin: 8px; padding: 10px 16px; }
-    input { padding: 8px; margin: 6px 0; }
-    .box { border: 1px solid #ccc; padding: 20px; margin-top: 20px; }
-  </style>
+<!-- Matomo Tag Manager (safe-loaded) -->
+<script>
+  window._mtm = window._mtm || [];
+  _mtm.push({ 'mtm.startTime': Date.now(), 'event': 'mtm.Start' });
+
+  (function () {
+    var d = document;
+    var g = d.createElement('script');
+    var s = d.getElementsByTagName('script')[0];
+
+    g.async = true;
+    g.src = 'https://cdn.matomo.cloud/d31ng.matomo.cloud/container_7dc62agp.js';
+
+    g.onload = () => console.log('[Matomo] Container loaded');
+    g.onerror = () => console.warn('[Matomo] Container BLOCKED');
+
+    s.parentNode.insertBefore(g, s);
+  })();
+</script>
+
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    padding: 40px;
+    background: #fafafa;
+  }
+  button {
+    padding: 10px 14px;
+    margin: 6px;
+  }
+  .box {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .status {
+    padding: 10px;
+    background: #eee;
+    margin-bottom: 20px;
+  }
+</style>
 </head>
 
 <body>
 
-  <h1>Matomo Cloud – Event Abuse Test Site</h1>
-  <p>Designed for Tag Manager, BAC, IDOR & Business Logic testing.</p>
+<h1>Matomo Cloud – Bug Bounty Test Site</h1>
 
-  <!-- Button Events -->
-  <div class="box">
-    <h2>Button Events</h2>
+<div class="status" id="status">
+  Page loaded ✅
+</div>
 
-    <button onclick="simpleClick()">Simple Click</button>
-    <button onclick="purchaseClick()">Fake Purchase</button>
-    <button onclick="adminAction()">Admin-Like Action</button>
-  </div>
+<div class="box">
+  <h2>Button Events</h2>
+  <button onclick="safePush('simple_click')">Simple Click</button>
+  <button onclick="fakePurchase()">Fake Purchase</button>
+  <button onclick="adminEvent()">Admin Action</button>
+</div>
 
-  <!-- Form Events -->
-  <div class="box">
-    <h2>Form Events</h2>
+<div class="box">
+  <h2>Form Event</h2>
+  <form onsubmit="submitForm(event)">
+    <input id="email" type="email" placeholder="test@example.com" required />
+    <button type="submit">Submit</button>
+  </form>
+</div>
 
-    <form onsubmit="submitForm(event)">
-      <input type="email" id="email" placeholder="Email address" required />
-      <br />
-      <button type="submit">Submit Form</button>
-    </form>
-  </div>
+<div class="box">
+  <h2>DOM & Timing</h2>
+  <p id="hover">Hover over this text</p>
+  <p id="timer">Timer pending…</p>
+</div>
 
-  <!-- DOM & Timing Events -->
-  <div class="box">
-    <h2>Automatic Events</h2>
+<script>
+  function mtmAvailable() {
+    return Array.isArray(window._mtm);
+  }
 
-    <p id="hoverTarget">Hover over this text</p>
-    <p id="timerStatus">Timer not triggered yet</p>
-  </div>
-
-  <!-- JavaScript Event Logic -->
-  <script>
-    function simpleClick() {
-      _mtm.push({
-        event: "simple_click",
-        buttonName: "simple_click_btn"
-      });
-      alert("Simple click sent");
+  function safePush(eventName, data = {}) {
+    if (!mtmAvailable()) {
+      console.warn('[MTM] push blocked:', eventName);
+      return;
     }
+    _mtm.push({ event: eventName, ...data });
+    console.log('[MTM] pushed:', eventName);
+  }
 
-    function purchaseClick() {
-      _mtm.push({
-        event: "purchase",
-        ecommerce: {
-          orderId: "ORDER-" + Math.floor(Math.random() * 10000),
-          revenue: 99.99,
-          currency: "USD"
-        }
-      });
-      alert("Purchase event sent");
-    }
-
-    function adminAction() {
-      _mtm.push({
-        event: "admin_action",
-        role: "admin",
-        action: "delete_user",
-        userId: 1337
-      });
-      alert("Admin-style event sent");
-    }
-
-    function submitForm(e) {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-
-      _mtm.push({
-        event: "form_submit",
-        formType: "newsletter",
-        email: email
-      });
-
-      alert("Form submit event sent");
-    }
-
-    // Hover event
-    document.getElementById("hoverTarget").addEventListener("mouseover", function () {
-      _mtm.push({
-        event: "hover_event",
-        element: "hoverTarget"
-      });
+  function fakePurchase() {
+    safePush('purchase', {
+      orderId: 'ORDER-' + Math.floor(Math.random() * 10000),
+      revenue: 99.99
     });
+    alert('Purchase event sent');
+  }
 
-    // Timer-based event (business logic gold)
-    setTimeout(() => {
-      document.getElementById("timerStatus").innerText = "Timer event fired";
-      _mtm.push({
-        event: "time_on_page",
-        seconds: 10
-      });
-    }, 10000);
+  function adminEvent() {
+    safePush('admin_action', {
+      role: 'admin',
+      userId: 1337
+    });
+    alert('Admin event sent');
+  }
 
-    // URL-based logic test
-    if (window.location.search.includes("promo=true")) {
-      _mtm.push({
-        event: "promo_view",
-        source: "url_param"
-      });
-    }
-  </script>
+  function submitForm(e) {
+    e.preventDefault();
+    safePush('form_submit', {
+      email: document.getElementById('email').value
+    });
+    alert('Form event sent');
+  }
+
+  document.getElementById('hover').addEventListener('mouseover', () => {
+    safePush('hover_event');
+  });
+
+  setTimeout(() => {
+    document.getElementById('timer').innerText = 'Timer fired (10s)';
+    safePush('time_on_page', { seconds: 10 });
+  }, 10000);
+</script>
 
 </body>
 </html>
